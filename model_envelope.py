@@ -56,6 +56,16 @@ class ModelEnvelope:
         with self._get_artifact_path("params.json").open() as f:
             return json.load(f)
 
+    def save_metadata(self, metadata):
+        """Saves any other metadata that you want to track with this model.
+        """
+        with self._get_artifact_path("metadata.json").open("w") as f:
+            json.dump(metadata, f)
+
+    def get_metadata(self):
+        with self._get_artifact_path("metadata.json").open() as f:
+            return json.load(f)
+
     def save_environment(self):
         cmd = [sys.executable, "-m", "pip", "freeze"]
         requirements = subprocess.check_output(cmd).decode('ascii').strip().split("\n")
