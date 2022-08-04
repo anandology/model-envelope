@@ -80,6 +80,9 @@ class ModelEnvelope:
         with self._get_artifact_path("env.json").open() as f:
             return json.load(f)
 
+    def has_tag(self, name, value):
+        return self.tags.get(name) == value
+
     @property
     def query_function(self):
         if self._query_function is None:
