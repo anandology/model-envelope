@@ -49,7 +49,8 @@ class ModelEnvelope:
     def save_params(self, params):
         """Saves the params used to create this model.
         """
-        self.write_artifact("params.json", json.dumps(params).encode('utf-8'))
+        with self._get_artifact_path("params.json").open("w") as f:
+            json.dump(params, f)
 
     def get_params(self):
         with self._get_artifact_path("params.json").open() as f:
@@ -62,7 +63,8 @@ class ModelEnvelope:
             "python_version": list(sys.version_info),
             "requirements": requirements
         }
-        self.write_artifact("env.json", json.dumps(d).encode('utf-8'))
+        with self._get_artifact_path("env.json").open("w") as f:
+            json.dump(d, f)
 
     def get_environment(self):
         with self._get_artifact_path("env.json").open() as f:
