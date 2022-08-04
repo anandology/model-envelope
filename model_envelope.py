@@ -4,8 +4,10 @@ import json
 from pathlib import Path
 import web
 import cloudpickle
+import sys
+import subprocess
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 db_url = "sqlite:///model.db"
 storage_path = "models"
@@ -33,6 +35,39 @@ class ModelEnvelope:
         with path.open("rb") as f:
             return cloudpickle.load(f)
 
+    def write_artifact(self, filename: str, contents: bytes):
+        """Writes an artifact related to the model.
+        """
+        path = Path(storage_path) / str(self.id) / filename
+        with path.open("wb") as f:
+            cloudpickle.dump(contents, f)
+        print("write", path)
+
+    def _get_artifact_path(self, filename: str) -> Path:
+        return Path(storage_path) / str(self.id) / filename
+
+    def save_params(self, params):
+        """Saves the params used to create this model.
+        """
+        self.write_artifact("params.json", json.dumps(params).encode('utf-8'))
+
+    def get_params(self):
+        with self._get_artifact_path("params.json").open() as f:
+            return json.load(f)
+
+    def save_environment(self):
+        cmd = [sys.executable, "-m", "pip", "freeze"]
+        requirements = subprocess.check_output(cmd).decode('ascii').strip().split("\n")
+        d = {
+            "python_version": list(sys.version_info),
+            "requirements": requirements
+        }
+        self.write_artifact("env.json", json.dumps(d).encode('utf-8'))
+
+    def get_environment(self):
+        with self._get_artifact_path("env.json").open() as f:
+            return json.load(f)
+
     @property
     def query_function(self):
         if self._query_function is None:
@@ -41,7 +76,7 @@ class ModelEnvelope:
 
     @staticmethod
     def find_all():
-        rows = get_db().select("model")
+        rows = get_db().select("model", order="id desc")
         return [ModelEnvelope(row.id, row.name, row.description, json.loads(row.tags)) for row in rows]
 
     @staticmethod
@@ -63,6 +98,7 @@ def save_model(query_function, name, description, tags):
     """
     model = ModelEnvelope.new(name, description, tags)
     model.write_query_function(query_function)
+    model.save_environment()
     return model
 
 def get_model(model_id):

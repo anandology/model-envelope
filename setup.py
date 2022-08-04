@@ -4,7 +4,7 @@ install_requires = ["web.py", "cloudpickle"]
 
 setup(
     name='model_envelope',
-    version='0.1',
+    version='0.2',
     description='POC of Model Envelope abstration from Stitchfix',
     author='Anand Chitipothu',
     author_email='anandology@gmail.com',
