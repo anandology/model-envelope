@@ -65,6 +65,10 @@ def save_model(query_function, name, description, tags):
     model.write_query_function(query_function)
     return model
 
+def get_model(model_id):
+    """Returns the ModelEnvelope for given id."""
+    return ModelEnvelope.find(model_id)
+
 def list_models(name=None, tags={}):
     models = ModelEnvelope.find_all()
     if name:
